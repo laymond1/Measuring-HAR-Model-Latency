@@ -7,9 +7,8 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import torch
 from torch import nn, Tensor
-from torchvision.ops import StochasticDepth
 
-from .operation import Conv1dNormActivation, SqueezeExcitation
+from .operation import Conv1dNormActivation, SqueezeExcitation, StochasticDepth
 from torchvision.utils import _log_api_usage_once
 from torchvision.models._utils import _make_divisible
 
