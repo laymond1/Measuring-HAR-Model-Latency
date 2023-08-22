@@ -4,9 +4,9 @@ from typing import Any, Callable, List, Optional, Sequence
 import torch
 from torch import nn, Tensor
 
-from .operation import Conv1dNormActivation, SqueezeExcitation as SElayer
-from torchvision.utils import _log_api_usage_once
-from torchvision.models._utils import _make_divisible
+from .operation import Conv1dNormActivation, _make_divisible, SqueezeExcitation as SElayer
+# from torchvision.utils import _log_api_usage_once
+# from torchvision.models._utils import _make_divisible
 
 
 __all__ = [
@@ -133,7 +133,7 @@ class MobileNetV3(nn.Module):
             dropout (float): The droupout probability
         """
         super().__init__()
-        _log_api_usage_once(self)
+        # _log_api_usage_once(self)
 
         if not inverted_residual_setting:
             raise ValueError("The inverted_residual_setting should not be empty")

@@ -8,9 +8,10 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 import torch
 from torch import nn, Tensor
 
-from .operation import Conv1dNormActivation, SqueezeExcitation, StochasticDepth
-from torchvision.utils import _log_api_usage_once
-from torchvision.models._utils import _make_divisible
+from .operation import Conv1dNormActivation, SqueezeExcitation, StochasticDepth, _make_divisible
+# from torchvision.utils import _log_api_usage_once
+# from torchvision.models._utils import _make_divisible
+
 
 
 __all__ = [
@@ -239,7 +240,7 @@ class EfficientNet(nn.Module):
             last_channel (int): The number of channels on the penultimate layer
         """
         super().__init__()
-        _log_api_usage_once(self)
+        # _log_api_usage_once(self)
 
         if not inverted_residual_setting:
             raise ValueError("The inverted_residual_setting should not be empty")

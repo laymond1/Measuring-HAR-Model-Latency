@@ -5,8 +5,8 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from torchvision.utils import _log_api_usage_once
-from torchvision.models._utils import _ovewrite_named_param
+# from torchvision.utils import _log_api_usage_once
+from .operation import _ovewrite_named_param
 
 
 __all__ = [
@@ -161,7 +161,7 @@ class ResNet(nn.Module):
         norm_layer: Optional[Callable[..., nn.Module]] = None,
     ) -> None:
         super().__init__()
-        _log_api_usage_once(self)
+        # _log_api_usage_once(self)
         if norm_layer is None:
             norm_layer = nn.BatchNorm1d
         self._norm_layer = norm_layer

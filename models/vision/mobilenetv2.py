@@ -4,10 +4,10 @@ from typing import Any, Callable, List, Optional
 import torch
 from torch import nn, Tensor
 
-from torchvision.utils import _log_api_usage_once
-from torchvision.models._utils import _make_divisible
+# from torchvision.utils import _log_api_usage_once
+# from torchvision.models._utils import _make_divisible
 
-from .operation import Conv1dNormActivation
+from .operation import Conv1dNormActivation, _make_divisible
 
 
 __all__ = ["MobileNetV2", "mobilenet_v2"]
@@ -89,7 +89,7 @@ class MobileNetV2(nn.Module):
 
         """
         super().__init__()
-        _log_api_usage_once(self)
+        # _log_api_usage_once(self)
 
         if block is None:
             block = InvertedResidual

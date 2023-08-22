@@ -1,12 +1,72 @@
-from typing import Any, Callable, List, Optional, Union, Tuple
+from typing import Any, Callable, List, Optional, Union, Tuple, Dict, TypeVar
+
+import collections
+from itertools import repeat
 
 import torch
 import torch.fx
 from torch import nn, Tensor
 
-from torchvision.utils import _log_api_usage_once
-from torchvision.ops.misc import ConvNormActivation
+# from torchvision.utils import _log_api_usage_once
+# from torchvision.ops.misc import ConvNormActivation
 
+
+class ConvNormActivation(torch.nn.Sequential):
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        kernel_size: Union[int, Tuple[int, ...]] = 3,
+        stride: Union[int, Tuple[int, ...]] = 1,
+        padding: Optional[Union[int, Tuple[int, ...], str]] = None,
+        groups: int = 1,
+        norm_layer: Optional[Callable[..., torch.nn.Module]] = torch.nn.BatchNorm2d,
+        activation_layer: Optional[Callable[..., torch.nn.Module]] = torch.nn.ReLU,
+        dilation: Union[int, Tuple[int, ...]] = 1,
+        inplace: Optional[bool] = True,
+        bias: Optional[bool] = None,
+        conv_layer: Callable[..., torch.nn.Module] = torch.nn.Conv2d,
+    ) -> None:
+
+        if padding is None:
+            if isinstance(kernel_size, int) and isinstance(dilation, int):
+                padding = (kernel_size - 1) // 2 * dilation
+            else:
+                _conv_dim = len(kernel_size) if isinstance(kernel_size, Sequence) else len(dilation)
+                kernel_size = _make_ntuple(kernel_size, _conv_dim)
+                dilation = _make_ntuple(dilation, _conv_dim)
+                padding = tuple((kernel_size[i] - 1) // 2 * dilation[i] for i in range(_conv_dim))
+        if bias is None:
+            bias = norm_layer is None
+
+        layers = [
+            conv_layer(
+                in_channels,
+                out_channels,
+                kernel_size,
+                stride,
+                padding,
+                dilation=dilation,
+                groups=groups,
+                bias=bias,
+            )
+        ]
+
+        if norm_layer is not None:
+            layers.append(norm_layer(out_channels))
+
+        if activation_layer is not None:
+            params = {} if inplace is None else {"inplace": inplace}
+            layers.append(activation_layer(**params))
+        super().__init__(*layers)
+        # _log_api_usage_once(self)
+        self.out_channels = out_channels
+
+        if self.__class__ == ConvNormActivation:
+            warnings.warn(
+                "Don't use ConvNormActivation directly, please use Conv2dNormActivation and Conv3dNormActivation instead."
+            )
+            
 
 class Conv1dNormActivation(ConvNormActivation):
     """
@@ -78,7 +138,7 @@ class SqueezeExcitation(torch.nn.Module):
         scale_activation: Callable[..., torch.nn.Module] = torch.nn.Sigmoid,
     ) -> None:
         super().__init__()
-        _log_api_usage_once(self)
+        # _log_api_usage_once(self)
         self.avgpool = torch.nn.AdaptiveAvgPool1d(1)
         self.fc1 = torch.nn.Conv1d(input_channels, squeeze_channels, 1)
         self.fc2 = torch.nn.Conv1d(squeeze_channels, input_channels, 1)
@@ -115,8 +175,8 @@ def stochastic_depth(input: Tensor, p: float, mode: str, training: bool = True) 
     Returns:
         Tensor[N, ...]: The randomly zeroed tensor.
     """
-    if not torch.jit.is_scripting() and not torch.jit.is_tracing():
-        _log_api_usage_once(stochastic_depth)
+    # if not torch.jit.is_scripting() and not torch.jit.is_tracing():
+    #     _log_api_usage_once(stochastic_depth)
     if p < 0.0 or p > 1.0:
         raise ValueError(f"drop probability has to be between 0 and 1, but got {p}")
     if mode not in ["batch", "row"]:
@@ -146,7 +206,7 @@ class StochasticDepth(nn.Module):
 
     def __init__(self, p: float, mode: str) -> None:
         super().__init__()
-        _log_api_usage_once(self)
+        # _log_api_usage_once(self)
         self.p = p
         self.mode = mode
 
@@ -156,3 +216,44 @@ class StochasticDepth(nn.Module):
     def __repr__(self) -> str:
         s = f"{self.__class__.__name__}(p={self.p}, mode={self.mode})"
         return s
+
+
+def _make_divisible(v: float, divisor: int, min_value: Optional[int] = None) -> int:
+    """
+    This function is taken from the original tf repo.
+    It ensures that all layers have a channel number that is divisible by 8
+    It can be seen here:
+    https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet/mobilenet.py
+    """
+    if min_value is None:
+        min_value = divisor
+    new_v = max(min_value, int(v + divisor / 2) // divisor * divisor)
+    # Make sure that round down does not go down by more than 10%.
+    if new_v < 0.9 * v:
+        new_v += divisor
+    return new_v
+
+
+def _make_ntuple(x: Any, n: int) -> Tuple[Any, ...]:
+    """
+    Make n-tuple from input x. If x is an iterable, then we just convert it to tuple.
+    Otherwise we will make a tuple of length n, all with value of x.
+    reference: https://github.com/pytorch/pytorch/blob/master/torch/nn/modules/utils.py#L8
+
+    Args:
+        x (Any): input value
+        n (int): length of the resulting tuple
+    """
+    if isinstance(x, collections.abc.Iterable):
+        return tuple(x)
+    return tuple(repeat(x, n))
+
+
+V = TypeVar("V")
+
+def _ovewrite_named_param(kwargs: Dict[str, Any], param: str, new_value: V) -> None:
+    if param in kwargs:
+        if kwargs[param] != new_value:
+            raise ValueError(f"The parameter '{param}' expected value {new_value} but got {kwargs[param]} instead.")
+    else:
+        kwargs[param] = new_value

@@ -6,9 +6,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from torchvision.utils import _log_api_usage_once
-from torchvision.models._api import register_model, Weights, WeightsEnum
-from torchvision.models._utils import _ovewrite_named_param, handle_legacy_interface
+# from torchvision.utils import _log_api_usage_once
 
 
 __all__ = [
@@ -105,7 +103,7 @@ class MNASNet(torch.nn.Module):
 
     def __init__(self, init_channels: int, alpha: float, num_classes: int = 1000, dropout: float = 0.2) -> None:
         super().__init__()
-        _log_api_usage_once(self)
+        # _log_api_usage_once(self)
         if alpha <= 0.0:
             raise ValueError(f"alpha should be greater than 0.0 instead of {alpha}")
         self.init_channels = init_channels
