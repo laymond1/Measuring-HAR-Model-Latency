@@ -48,7 +48,7 @@ def main(args):
     input_tensor = torch.randn(batch_size, init_channels, window_size).to(device)
 
     # measure the latency of model
-    genotype = eval(f"genotypes.{args.arch}")
+    genotype = eval("genotypes.{}".format(args.arch))
     model = get_spec(genotype)
     model = model.write(NUM_CLASSES, init_channels, window_size, batch_size, classifier)
     model.to(device)
