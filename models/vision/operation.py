@@ -116,7 +116,51 @@ class Conv1dNormActivation(ConvNormActivation):
             bias,
             torch.nn.Conv1d,
         )
-        
+
+
+class SeparableConv1d(torch.nn.Module):
+    def __init__(self,
+                 in_channels: int,
+                 out_channels: int,
+                 kernel_size: int,
+                 stride: int,
+                 expand_ratio: int,
+                 norm_layer: Optional[Callable[..., nn.Module]] = None,
+        ) -> None:
+        super().__init__()
+        self.stride = stride
+        if stride not in [1, 2]:
+            raise ValueError(f"stride should be 1 or 2 insted of {stride}")
+
+        if norm_layer is None:
+            norm_layer = nn.BatchNorm1d
+
+        layers: List[nn.Module] = []
+
+        hidden_dim = int(round(in_channels * expand_ratio))
+        layers.extend(
+            [
+                # dw
+                Conv1dNormActivation(
+                    in_channels,
+                    hidden_dim,
+                    kernel_size=kernel_size,
+                    stride=stride,
+                    groups=in_channels,
+                    norm_layer=norm_layer,
+                    activation_layer=nn.ReLU,
+                ),
+                # pw-linear
+                nn.Conv1d(hidden_dim, out_channels, 1, 1, 0, bias=False),
+                norm_layer(out_channels),
+            ]
+        )
+        self.conv = nn.Sequential(*layers)
+        self.out_channels = out_channels
+
+    def forward(self, x: Tensor) -> Tensor:
+        return self.conv(x)      
+      
 
 class SqueezeExcitation(torch.nn.Module):
     """
