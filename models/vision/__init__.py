@@ -5,3 +5,4 @@ from .mobilenetv3 import *
 from .resnet import *
 from .shufflenetv2 import *
 from .squeezenet import *
+from .marnasnet import *
