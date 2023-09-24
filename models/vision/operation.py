@@ -20,7 +20,7 @@ class ConvNormActivation(torch.nn.Sequential):
         stride: Union[int, Tuple[int, ...]] = 1,
         padding: Optional[Union[int, Tuple[int, ...], str]] = None,
         groups: int = 1,
-        norm_layer: Optional[Callable[..., torch.nn.Module]] = torch.nn.BatchNorm2d,
+        norm_layer: Optional[Callable[..., torch.nn.Module]] = torch.nn.BatchNorm1d,
         activation_layer: Optional[Callable[..., torch.nn.Module]] = torch.nn.ReLU,
         dilation: Union[int, Tuple[int, ...]] = 1,
         inplace: Optional[bool] = True,
