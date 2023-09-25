@@ -1,21 +1,30 @@
-
 import argparse
 import os
-import csv
-import sys
 import torch
-import pandas as pd
-from tqdm import tqdm
-from thop import profile
-
-# sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-
-from utils.utils import AverageMeter
+from torch.utils.mobile_optimizer import optimize_for_mobile
+from utils import create_exp_dir
 
 from data_providers import *
 from models.vision import *
 
+
+# if '1.6.0' not in torch.__version__:
+#     raise ValueError("PyTorch version should be 1.6.0")
+
+
+def convert_model(net, input_tensor):
+    # convert model to torchscript
+    traced_script_module = torch.jit.trace(net, input_tensor)
+    model_path = os.path.join(args.save, f'{args.arch}.pt')
+    torch.jit.save(traced_script_module, model_path)
+    print(f"CPU model saved at : {model_path}")
+
+
 def main(args):
+    if len(args.save) < 1:
+        args.save = 'mobile_pt/{}'.format(args.dataset)
+    create_exp_dir(args.save, scripts_to_save=None)
+    
     # dataset
     if args.dataset == 'uci':
         dataset = UCIHARDataProvider(data_path='', train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
@@ -33,13 +42,6 @@ def main(args):
     init_channels, window_size = dataset.data_shape
     NUM_CLASSES = dataset.n_classes
     batch_size = args.batch_size
-    
-    # set device    
-    device = torch.device("cuda:0" if args.device == 'gpu' else "cpu")
-    # device = torch.device("%s" % args.device)
-    
-    # create input dummy data
-    input_tensor = torch.randn(batch_size, init_channels, window_size).to(device)
     
     # mobilenet v2 & v3
     if args.arch == 'mobilenet_v2':
@@ -109,55 +111,33 @@ def main(args):
         model = efficientnet_v2_m(init_channels=init_channels, num_classes=NUM_CLASSES)
     elif args.arch == 'efficientnet_v2_l':    
         model = efficientnet_v2_l(init_channels=init_channels, num_classes=NUM_CLASSES)
+    elif args.arch == 'marnasnet_a':
+        model = marnasnet_a(init_channels=init_channels, num_classes=NUM_CLASSES)
+    elif args.arch == 'marnasnet_b':
+        model = marnasnet_b(init_channels=init_channels, num_classes=NUM_CLASSES)
+    elif args.arch == 'marnasnet_c':
+        model = marnasnet_c(init_channels=init_channels, num_classes=NUM_CLASSES)
+    elif args.arch == 'marnasnet_d':
+        model = marnasnet_d(init_channels=init_channels, num_classes=NUM_CLASSES)
+    elif args.arch == 'marnasnet_e':
+        model = marnasnet_e(init_channels=init_channels, num_classes=NUM_CLASSES)
     else:
         raise ValueError("%s is not included" % args.arch)
     
-    model.to(device)
     model.eval()
+    input_tensor = torch.zeros(batch_size, init_channels, window_size)
     
-    starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
-    
-    # warm-up 실행
-    with torch.no_grad():
-        for _ in range(10):
-            _ = model(input_tensor)
-
-    # 
-    latency = AverageMeter()
-    with torch.no_grad():
-        # for i in tqdm(range(args.num_runs)):
-        for i in range(args.num_runs):
-            
-            starter.record()            
-            model(input_tensor)
-            ender.record()
-            
-            torch.cuda.synchronize()
-            latency.update(starter.elapsed_time(ender)) # miliseconds
-        print("%s: %f" % (args.arch, latency.avg))
-    
-    # CSV 파일에 실험 결과 저장
-    # df = pd.read_csv('vision.csv')
-    filename = args.config_file
-
-    with open(filename, mode='a', newline='') as f:
-        list_data = [args.dataset, args.batch_size, args.arch, args.hardware, args.device, latency.avg]
-        # Pass the CSV  file object to the writer() function
-        writer = csv.writer(f)
-        writer.writerow(list_data)  
-
-    print("Experiment results saved to", filename)
+    convert_model(model, input_tensor)
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Compute latency of each vision model for 1D data.')
+    parser = argparse.ArgumentParser(description='Convert each model to [CPU, GPU, NNAPI].')
     parser.add_argument('--dataset', type=str, default='uci', choices=['uci', 'opp', 'kar', 'uni', 'wis'])
     parser.add_argument('--batch_size', type=int, default=1, help='batch size. default is 1')
-    parser.add_argument('--arch', type=str, default='mobilenet_v2', help='which architecture to use')
-    parser.add_argument('--config_file', type=str, default='vision.csv', help='path to config file.')
-    parser.add_argument('--num-runs', type=int, default=100,
-                        help='number of runs to compute average forward timing. default is 100')
     parser.add_argument('--hardware', type=str, default='pc', choices=['pc', 'nano'])
     parser.add_argument('--device', type=str, default='cpu', choices=['cpu', 'gpu'])
+    # convert
+    parser.add_argument('--arch', type=str, default='mobilenet_v2', help='which architecture to use')
+    parser.add_argument('--save', type=str, default='', help='saved path name')
     args = parser.parse_args()
     main(args)
