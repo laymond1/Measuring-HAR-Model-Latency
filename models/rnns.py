@@ -6,10 +6,10 @@ class HARConvLSTM(nn.Module):
     def __init__(self, init_channels, num_classes):
         super(HARConvLSTM, self).__init__()
 
-        self.conv1 = nn.Conv1d(init_channels, 64, 5)
-        self.conv2 = nn.Conv1d(64, 64, 5)
-        self.conv3 = nn.Conv1d(64, 64, 5)
-        self.conv4 = nn.Conv1d(64, 64, 5)
+        self.conv1 = nn.Conv1d(init_channels, 64, 5, padding=2)
+        self.conv2 = nn.Conv1d(64, 64, 5, padding=2)
+        self.conv3 = nn.Conv1d(64, 64, 5, padding=2)
+        self.conv4 = nn.Conv1d(64, 64, 5, padding=2)
 
         self.lstm = nn.LSTM(input_size=64, hidden_size=128, num_layers=2, batch_first=True)
         
