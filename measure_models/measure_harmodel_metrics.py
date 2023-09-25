@@ -6,7 +6,7 @@ import fvcore.nn as fnn
 
 from thop import profile
 
-from utils.utils import AverageMeter
+from utils.utils import AverageMeter, calculate_model_size
 
 from data_providers import *
 from models import *
@@ -65,15 +65,18 @@ def main(args):
     macs, params = profile(model, inputs=(input_tensor, ), verbose=False)
     print("Flops: %f, Param size: %fMB" % (macs/1e6, params/1e6))
     
+    size_all_mb = calculate_model_size(model)
+    print('model size: {:.3f}MB'.format(size_all_mb))
+    
     # CSV 파일에 실험 결과 저장
     # df = pd.read_csv('model_spec.csv')
     filename = args.config_file
 
     with open(filename, mode='a', newline='') as f:
-        list_data = [args.dataset, args.arch, params/1e6, macs/1e6]
+        list_data = [args.dataset, args.arch, params/1e6, macs/1e6, size_all_mb]
         # Pass the CSV  file object to the writer() function
         writer = csv.writer(f)
-        writer.writerow(list_data)  
+        writer.writerow(list_data)
 
     print("Experiment results saved to", filename)
     
