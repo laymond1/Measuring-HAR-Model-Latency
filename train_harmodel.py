@@ -37,7 +37,7 @@ parser.add_argument('--epochs', type=int, default=300, help='num of training epo
 parser.add_argument('--layers', type=int, default=1, help='total number of layers')
 parser.add_argument('--classifier', type=str, default='LSTM', help='type of classifier')
 parser.add_argument('--arch', type=str, default='RTWCNN', help='which architecture to use')
-parser.add_argument('--save', type=str, default='EXP', help='experiment name')
+parser.add_argument('--save', type=str, default='save', help='experiment name')
 parser.add_argument('--seed', type=int, default=0, help='random seed')
 parser.add_argument('--trial', type=int, default=0, help='n-th trial')
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
@@ -48,7 +48,9 @@ args = parser.parse_args()
 
 
 if args.save == 'EXP':
-  args.save = 'result_harmodel/{}/train-{}-{}'.format(args.dataset, args.save, time.strftime("%Y%m%d-%H%M%S"))
+	args.save = 'result_harmodel/{}/train-{}-{}'.format(args.dataset, args.save, time.strftime("%Y%m%d-%H%M%S"))
+else:
+    args.save = 'result_vismodel/{dataset}/{arch}/trial-{trial}'.format(dataset=args.dataset, arch=args.arch, trial=args.trial)
 utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
 
 log_format = '%(asctime)s %(message)s'

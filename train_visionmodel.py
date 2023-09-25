@@ -35,7 +35,7 @@ parser.add_argument('--report_freq', type=float, default=50, help='report freque
 parser.add_argument('--gpu', type=int, default=0, help='gpu device id')
 parser.add_argument('--epochs', type=int, default=300, help='num of training epochs')
 parser.add_argument('--arch', type=str, default='marnasnet_a', help='which architecture to use')
-parser.add_argument('--save', type=str, default='EXP', help='experiment name')
+parser.add_argument('--save', type=str, default='save', help='experiment name')
 parser.add_argument('--seed', type=int, default=0, help='random seed')
 parser.add_argument('--trial', type=int, default=0, help='n-th trial')
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
@@ -46,7 +46,9 @@ args = parser.parse_args()
 
 
 if args.save == 'EXP':
-  args.save = 'result_vismodel/{}/train-{}-{}'.format(args.dataset, args.save, time.strftime("%Y%m%d-%H%M%S"))
+	args.save = 'result_vismodel/{}/train-{}-{}'.format(args.dataset, args.save, time.strftime("%Y%m%d-%H%M%S"))
+else:
+    args.save = 'result_vismodel/{dataset}/{arch}/trial-{trial}'.format(dataset=args.dataset, arch=args.arch, trial=args.trial)
 utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
 
 log_format = '%(asctime)s %(message)s'
