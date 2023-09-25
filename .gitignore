@@ -1,0 +1,13 @@
+__pycache__/
+
+GTSNet
+
+data/
+
+mobile_pt/
+
+*.csv
+
+result_harmodel/
+result_vismodel/
+wandb/
