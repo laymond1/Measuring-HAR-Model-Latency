@@ -165,7 +165,7 @@ def main():
 					stopping_metric))
 		wandb.log({
 			'Train loss': train_loss, 'Train Acc': train_acc, 
-			'Valid loss': val_loss, 'Valid Acc': top_classes,
+			'Valid loss': val_loss, 'Valid Acc': accuracy,
 			'f1-score': f1score, 'Macro f1-score': f1macro
 		})
 		
