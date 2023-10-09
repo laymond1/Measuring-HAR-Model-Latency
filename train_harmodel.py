@@ -27,6 +27,7 @@ parser.add_argument('--dataset', type=str, default='uci', choices=['uci', 'opp',
 parser.add_argument('--data_path', type=str, default='', help='location of the data corpus')
 parser.add_argument('--batch_size', type=int, default=256, help='batch size')
 parser.add_argument('--early_stop', type=int, default=20, help='early stop')
+parser.add_argument('--optimizer', type=str, default='SGD', choices=['SGD', 'Adam', 'AdamW'], help='optimizer')
 parser.add_argument('--lr_schedule', type=str, default='cosine', choices=[None, 'step', 'cosine'], help='lr schedule')
 parser.add_argument('--learning_rate', type=float, default=0.025, help='init learning rate')
 parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
@@ -117,10 +118,9 @@ def main():
 	if not args.nowand:
 		wandb.log({'Param Size(MB)': utils.count_parameters_in_MB(model)})
 
-	optimizer = torch.optim.SGD(model.parameters(),
-								args.learning_rate,
-								momentum=args.momentum,
-								weight_decay=args.weight_decay)
+	optimizer = utils.build_optimizer(optimizer=args.optimizer, 
+                                      net=model,
+                                      lr=args.learning_rate)
 
 	targets_cumulative = dataset.Ytest
 	criterion = nn.CrossEntropyLoss()
