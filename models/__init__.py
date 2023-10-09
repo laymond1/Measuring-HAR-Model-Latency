@@ -3,6 +3,7 @@ from .cnn_w import RTWCNN
 from .rnns import HARLSTM, HARBiLSTM, HARConvLSTM
 from .t_fcn import FCNTSC
 from .t_resnet import ResNetTSC
+from .gtsnet import GTSNet
 
 
 def create_harmodel(arch, init_channels, NUM_CLASSES, window_size=None):
@@ -24,6 +25,9 @@ def create_harmodel(arch, init_channels, NUM_CLASSES, window_size=None):
         model = ResNetTSC(init_channels=init_channels, num_classes=NUM_CLASSES)
     elif arch == 'FCNTSC':
         model = FCNTSC(init_channels=init_channels, num_classes=NUM_CLASSES)
+    # GTSNet    
+    elif arch == 'GTSNet':
+        model = GTSNet(init_channels=init_channels, num_classes=NUM_CLASSES)
     else:
         raise ValueError("%s is not included" % arch)
 
