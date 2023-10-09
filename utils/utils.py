@@ -18,6 +18,26 @@ def create_exp_dir(path, scripts_to_save=None):
       shutil.copyfile(script, dst_file)
 
 
+def build_optimizer(optimizer, net, lr):
+    if optimizer == "Adam":
+        opt = torch.optim.Adam(
+            net.parameters(), lr=lr,
+            betas=(0.9, 0.999), weight_decay=1e-4
+        )
+    elif optimizer == "AdamW":
+        opt = torch.optim.AdamW(
+            net.parameters(), lr=lr,
+            weight_decay=3e-8
+        )
+    elif optimizer == "SGD":
+        opt = torch.optim.SGD(
+            net.parameters(), lr=lr,
+            momentum=0.9,
+            weight_decay=3e-4
+        )
+    return opt
+
+
 # noinspection PyUnresolvedReferences
 def cross_entropy_with_label_smoothing(pred, target, label_smoothing=0.1):
     logsoftmax = torch.nn.LogSoftmax()
