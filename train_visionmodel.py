@@ -27,7 +27,7 @@ parser.add_argument('--dataset', type=str, default='uci', choices=['uci', 'opp',
 parser.add_argument('--data_path', type=str, default='', help='location of the data corpus')
 parser.add_argument('--batch_size', type=int, default=256, help='batch size')
 parser.add_argument('--early_stop', type=int, default=20, help='early stop')
-parser.add_argument('--lr_schedule', type=str, default='cosine', help='lr schedule')
+parser.add_argument('--lr_schedule', type=str, default='cosine', choices=[None, 'step', 'cosine'], help='lr schedule')
 parser.add_argument('--learning_rate', type=float, default=0.025, help='init learning rate')
 parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 parser.add_argument('--weight_decay', type=float, default=3e-4, help='weight decay')
@@ -114,7 +114,8 @@ def main():
 
 	logging.info("Architecture = %s", args.arch)
 	logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
-	wandb.log({'Param Size(MB)': utils.count_parameters_in_MB(model)})
+	if not args.nowand:
+		wandb.log({'Param Size(MB)': utils.count_parameters_in_MB(model)})
 
 	optimizer = torch.optim.SGD(model.parameters(),
 								args.learning_rate,
@@ -141,8 +142,10 @@ def main():
 
 	for epoch in range(args.epochs):
         
-		logging.info('epoch %d lr %e', epoch, scheduler.get_last_lr()[0])
-		wandb.log({'Epoch lr': scheduler.get_last_lr()[0]})
+		logging.info('epoch %d lr %e', epoch, optimizer.param_groups[0]['lr'])
+		
+		if not args.nowand:
+			wandb.log({'Epoch lr': optimizer.param_groups[0]['lr']})
         
 		train_acc, train_loss = train(dataset.train, model, criterion, optimizer)
         
@@ -158,14 +161,15 @@ def main():
 		
 		logging.info(
 				'Epoch {}/{}, Train loss: {:.4f}, Val loss: {:.4f}, Acc: {:.3f}, f1: {:.3f}, M f1: {:.3f}, '
-				'M: {:.4f}'.format(
+				'Stop Metric: {:.4f}'.format(
 					epoch + 1, args.epochs, train_loss, val_loss, accuracy, f1score, f1macro,
 					stopping_metric))
-		wandb.log({
-			'Train loss': train_loss, 'Train Acc': train_acc, 
-			'Valid loss': val_loss, 'Valid Acc': accuracy,
-			'f1-score': f1score, 'Macro f1-score': f1macro
-		})
+		if not args.nowand:
+			wandb.log({
+				'Train loss': train_loss, 'Train Acc': train_acc, 
+				'Valid loss': val_loss, 'Valid Acc': accuracy,
+				'f1-score': f1score, 'Macro f1-score': f1macro
+			})
 		
 		if args.early_stop:
 			early_stopping((-stopping_metric), model, epoch)
@@ -177,7 +181,8 @@ def main():
 	end = datetime.now()
 	time = (end - start).total_seconds()
 	logging.info('Best F1: %.3f, Train time: %.3f', early_stopping.best_score, time)
-	wandb.log({'Best F1': early_stopping.best_score})
+	if not args.nowand:
+		wandb.log({'Best F1': early_stopping.best_score})
 
 
 def train(train_queue, model, criterion, optimizer):
