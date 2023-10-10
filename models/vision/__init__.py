@@ -7,9 +7,11 @@ from .shufflenetv2 import *
 from .squeezenet import *
 from .marnasnet import *
 
+from .blocks import *
+
 
 def create_vismodel(arch, init_channels, NUM_CLASSES):
-        # mobilenet v2 & v3
+    # mobilenet v2 & v3
     if arch == 'mobilenet_v2':
         model = mobilenet_v2(init_channels=init_channels, num_classes=NUM_CLASSES)
     elif arch == 'mobilenet_v3_small':
@@ -91,3 +93,25 @@ def create_vismodel(arch, init_channels, NUM_CLASSES):
         raise ValueError("%s is not included" % arch)
     
     return model
+
+def create_block(block_name, cnf):
+    # Conv
+    if block_name == 'ConvBlock':
+        block = ConvBlock(cnf)        
+    # SepConv
+    elif block_name == 'SeparableConvBlock':
+        block = SeparableConvBlock(cnf)
+    # MBConv
+    elif block_name == 'MBConvBlock':
+        block = MBConvBlock(cnf)
+    # ResConv
+    elif block_name == 'ResConvBlock':
+        block = ResConvBlock(cnf)
+    # ShuffleConv
+    elif block_name == 'ShuffleBlock':
+        block = ShuffleBlock(cnf)
+    else:
+        raise ValueError("%s is not included" % block_name)
+    
+    return block
+    
