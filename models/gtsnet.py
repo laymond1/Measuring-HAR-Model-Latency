@@ -114,7 +114,7 @@ class ResidualBlock(nn.Module):
     def forward(self, x):
         _,_,t = x.size()
         if self.pool:
-            x = F.adaptive_max_pool1d(x,t//2)
+            x = F.adaptive_max_pool1d(x, t//2)
         residual = x
         out = F.relu(self.conv1(x))
         out = F.relu(self.conv2(out))
@@ -136,8 +136,8 @@ class GTSNet(nn.Module):
         self.bn = nn.BatchNorm1d(first_channels)
 
         self.block1 = ResidualBlock(first_channels, n_fs,n_groups, first_grouped_conv=False, pool=True)
-        self.block2 = ResidualBlock(n_fs, n_fs*2,n_groups, pool=True)
-        self.block3 = ResidualBlock(n_fs*2, n_fs*2,n_groups)
+        self.block2 = ResidualBlock(n_fs, n_fs*2, n_groups, pool=True)
+        self.block3 = ResidualBlock(n_fs*2, n_fs*2, n_groups)
         self.final = nn.Linear(n_fs*2, num_classes)
         
     def forward(self, x):
