@@ -97,6 +97,7 @@ class ConvBlock(nn.Module):
                 )
         elif cnf.skip_op == 'identity':
             self.use_res_connect = True
+            self.identity = None
             if cnf.stride == 1 and cnf.input_channels != cnf.out_channels:
                 self.identity = Conv1dNormActivation(
                                     cnf.input_channels,
@@ -115,7 +116,7 @@ class ConvBlock(nn.Module):
         result = self.block(input)
         # 2. same channels or diff channels
         if self.use_res_connect:
-            if input.size(1) == result.size(1):
+            if self.identity is None:
                 result += input
             else:
                 result += self.identity(input)
@@ -182,6 +183,7 @@ class SeparableConvBlock(nn.Module):
                 )
         elif cnf.skip_op == 'identity':
             self.use_res_connect = True
+            self.identity = None
             if cnf.stride == 1 and cnf.input_channels != cnf.out_channels:
                 self.identity = \
                     Conv1dNormActivation(
@@ -201,7 +203,7 @@ class SeparableConvBlock(nn.Module):
         result = self.block(input)
         # 2. same channels or diff channels
         if self.use_res_connect:
-            if input.size(1) == result.size(1):
+            if self.identity is None:
                 result += input
             else:
                 result += self.identity(input)
