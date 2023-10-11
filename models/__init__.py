@@ -5,6 +5,7 @@ from .t_fcn import FCNTSC
 from .t_resnet import ResNetTSC
 from .gtsnet import GTSNet
 
+from .harblocks import *
 
 def create_harmodel(arch, init_channels, NUM_CLASSES, window_size=None):
     # RTCNN
@@ -32,3 +33,19 @@ def create_harmodel(arch, init_channels, NUM_CLASSES, window_size=None):
         raise ValueError("%s is not included" % arch)
 
     return model
+
+
+def create_harblock(block_name, cnf):
+    # LSTMBlock
+    if block_name == 'LSTMBlock':
+        block = LSTMBlock(cnf)
+    # BiLSTMBlock
+    elif block_name == 'BiLSTMBlock':
+        block = BiLSTMBlock(cnf)
+    # GTSResConvBlock
+    elif block_name == 'GTSResConvBlock':
+        block = GTSResConvBlock(cnf)
+    else:
+        raise ValueError("%s is not included" % block_name)
+    
+    return block
