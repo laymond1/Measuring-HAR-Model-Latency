@@ -85,11 +85,11 @@ def main(args):
     # df = pd.read_csv('blocks.csv')
     filename = args.config_file
 
-    # with open(filename, mode='a', newline='') as f:
-    #     list_data = [args.dataset, args.batch_size, window_size, args.block_name, args.kernel_size, args.input_channels, args.out_channels, args.num_layers, args.hardware, args.device, latency.avg]
-    #     # Pass the CSV  file object to the writer() function
-    #     writer = csv.writer(f)
-    #     writer.writerow(list_data)  
+    with open(filename, mode='a', newline='') as f:
+        list_data = [args.dataset, args.batch_size, window_size, args.block_name, args.kernel_size, args.input_channels, args.out_channels, args.num_layers, args.hardware, args.device, latency.avg]
+        # Pass the CSV  file object to the writer() function
+        writer = csv.writer(f)
+        writer.writerow(list_data)  
 
     print("Experiment results saved to", filename)
 
