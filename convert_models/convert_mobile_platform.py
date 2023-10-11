@@ -1,6 +1,10 @@
 import argparse
+import os
+import sys
 import torch
 from torch.utils.mobile_optimizer import optimize_for_mobile
+
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 from data_providers import *
 from models import * # RTCNN RTWCNN HARLSTM HARBiLSTM HARConvLSTM ResNetTSC FCNTSC
@@ -12,13 +16,13 @@ def convert_model(net, input_tensor):
     # 1. CPU
     model_script = torch.jit.script(net)
     model_cpu = optimize_for_mobile(model_script)
-    model_cpu._save_for_lite_interpreter(f"mobile_pt/{args.arch}/model_cpu.ptl")
-    print("CPU model saved at : mobile_pt/model_cpu.ptl")
+    model_cpu._save_for_lite_interpreter(f"mobile_models_pt/{args.arch}/model_cpu.ptl")
+    print("CPU model saved at : mobile_models_pt/model_cpu.ptl")
     
     # 2. GPU(Vulkan)
     model_vulkan = optimize_for_mobile(model_script, backend="Vulkan")
-    model_vulkan._save_for_lite_interpreter(f"mobile_pt/{args.arch}/model_vulkan.ptl")
-    print("GPU(Vulkan) model saved at : mobile_pt/model_vulkan.ptl")
+    model_vulkan._save_for_lite_interpreter(f"mobile_models_pt/{args.arch}/model_vulkan.ptl")
+    print("GPU(Vulkan) model saved at : mobile_models_pt/model_vulkan.ptl")
     
     # 3. NNAPI
     # input_float = torch.zeros(1, 3, 128)
@@ -28,8 +32,8 @@ def convert_model(net, input_tensor):
     with torch.no_grad():
         traced = torch.jit.trace(net, input_tensor)
         model_nnapi = torch.backends._nnapi.prepare.convert_model_to_nnapi(traced, input_tensor)
-        model_nnapi._save_for_lite_interpreter(f"mobile_pt/{args.arch}/model_nnapi.ptl")
-    print("NNAPI model saved at : mobile_pt/model_nnapi.ptl")
+        model_nnapi._save_for_lite_interpreter(f"mobile_models_pt/{args.arch}/model_nnapi.ptl")
+    print("NNAPI model saved at : mobile_models_pt/model_nnapi.ptl")
 
 
 def main(args):

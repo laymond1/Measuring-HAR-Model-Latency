@@ -1,7 +1,11 @@
 import argparse
 import os
+import sys
 import torch
 from torch.utils.mobile_optimizer import optimize_for_mobile
+
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 from utils import create_exp_dir
 
 from data_providers import *
@@ -22,7 +26,7 @@ def convert_model(net, input_tensor):
 
 def main(args):
     if len(args.save) < 1:
-        args.save = 'mobile_pt/{}'.format(args.dataset)
+        args.save = 'mobile_models_pt/{}'.format(args.dataset)
     create_exp_dir(args.save, scripts_to_save=None)
     
     # dataset
@@ -43,26 +47,7 @@ def main(args):
     NUM_CLASSES = dataset.n_classes
     batch_size = args.batch_size
     
-    # RTCNN
-    if args.arch == 'RTCNN':
-        model = RTCNN(flat_size=None, init_channels=init_channels, num_classes=NUM_CLASSES, acc_num=None) # TODO: fix this
-    elif args.arch == 'RTWCNN':
-        model = RTWCNN(init_channels=init_channels, num_classes=NUM_CLASSES, segment_size=window_size)
-    # LSTM
-    elif args.arch == 'HARLSTM':
-        model = HARLSTM(init_channels=init_channels, num_classes=NUM_CLASSES)
-    elif args.arch == 'HARBiLSTM':
-        model = HARBiLSTM(init_channels=init_channels, num_classes=NUM_CLASSES)
-    elif args.arch == 'HARConvLSTM':
-        model = HARConvLSTM(init_channels=init_channels, num_classes=NUM_CLASSES)
-    # TSC
-    elif args.arch == 'ResNetTSC':
-        model = ResNetTSC(init_channels=init_channels, num_classes=NUM_CLASSES)
-    elif args.arch == 'FCNTSC':
-        model = FCNTSC(init_channels=init_channels, num_classes=NUM_CLASSES)
-    else:
-        raise ValueError("%s is not included" % args.arch)
-    
+    model = create_harmodel(args.arch, init_channels, NUM_CLASSES, window_size)
     model.eval()
     input_tensor = torch.zeros(batch_size, init_channels, window_size)
     
