@@ -61,7 +61,7 @@ def main(args):
     size_all_mb = calculate_model_size(model)
     print('model size: {:.3f}MB'.format(size_all_mb))
     
-    # CSV 파일에 실험 결과 저장
+    # save CSV
     # df = pd.read_csv('harnas_spec.csv')
     filename = args.config_file
 

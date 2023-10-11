@@ -47,7 +47,7 @@ def main(args):
     
     starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
     
-    # warm-up 실행
+    # warm-up
     with torch.no_grad():
         for _ in range(10):
             _ = model(input_tensor)
@@ -66,7 +66,7 @@ def main(args):
             latency.update(starter.elapsed_time(ender)) # miliseconds
         print("%s: %f" % (args.arch, latency.avg))
     
-    # CSV 파일에 실험 결과 저장
+    # save CSV
     # df = pd.read_csv('vision.csv')
     filename = args.config_file
 
