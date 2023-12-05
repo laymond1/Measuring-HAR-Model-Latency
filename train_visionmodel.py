@@ -142,6 +142,8 @@ def main():
 	elif args.lr_schedule == 'cosine':
 			scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, float(args.epochs))
 
+
+	best_score = 0
 	for epoch in range(args.epochs):
         
 		logging.info('epoch %d lr %e', epoch, optimizer.param_groups[0]['lr'])
@@ -160,6 +162,9 @@ def main():
 		f1macro = metrics.f1_score(targets_cumulative, top_classes, average='macro')
 		stopping_metric = f1score # be negative at stopping_metric
 		# stopping_metric = val_loss # be positive at stopping_metric
+		
+		if best_score < f1score:
+			best_score = f1score
 		
 		logging.info(
 				'Epoch {}/{}, Train loss: {:.4f}, Val loss: {:.4f}, Acc: {:.3f}, f1: {:.3f}, M f1: {:.3f}, '
@@ -182,9 +187,9 @@ def main():
 			
 	end = datetime.now()
 	time = (end - start).total_seconds()
-	logging.info('Best F1: %.3f, Train time: %.3f', early_stopping.best_score, time)
+	logging.info('Best F1: %.3f, Train time: %.3f', best_score, time)
 	if not args.nowand:
-		wandb.log({'Best F1': early_stopping.best_score})
+		wandb.log({'Best F1': best_score})
 
 
 def train(train_queue, model, criterion, optimizer):
