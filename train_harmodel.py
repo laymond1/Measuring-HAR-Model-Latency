@@ -26,12 +26,12 @@ parser = argparse.ArgumentParser("HAR Model Training")
 parser.add_argument('--dataset', type=str, default='uci', choices=['uci', 'opp', 'kar', 'uni', 'wis'], help='dataset to use')
 parser.add_argument('--data_path', type=str, default='', help='location of the data corpus')
 parser.add_argument('--batch_size', type=int, default=256, help='batch size')
-parser.add_argument('--early_stop', type=int, default=20, help='early stop')
-parser.add_argument('--optimizer', type=str, default='SGD', choices=['SGD', 'Adam', 'AdamW'], help='optimizer')
-parser.add_argument('--lr_schedule', type=str, default='cosine', choices=[None, 'step', 'cosine'], help='lr schedule')
-parser.add_argument('--learning_rate', type=float, default=0.025, help='init learning rate')
-parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
-parser.add_argument('--weight_decay', type=float, default=3e-4, help='weight decay')
+parser.add_argument('--early_stop', type=int, default=0, help='early stop')
+parser.add_argument('--optimizer', type=str, default='Adam', choices=['SGD', 'Adam', 'AdamW'], help='optimizer')
+parser.add_argument('--lr_schedule', type=str, default=None, choices=[None, 'step', 'cosine'], help='lr schedule')
+parser.add_argument('--learning_rate', type=float, default=0.0005, help='init learning rate')
+# parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
+# parser.add_argument('--weight_decay', type=float, default=3e-4, help='weight decay')
 parser.add_argument('--report_freq', type=float, default=50, help='report frequency')
 parser.add_argument('--gpu', type=int, default=0, help='gpu device id')
 parser.add_argument('--epochs', type=int, default=300, help='num of training epochs')
@@ -60,7 +60,7 @@ fh.setFormatter(logging.Formatter(log_format))
 logging.getLogger().addHandler(fh)
 
 if args.wandb_project is None:
-	args.wandb_project = args.dataset
+	args.wandb_project = args.dataset + '-har'
 
 if not args.nowand:
 	assert wandb is not None, "Wandb not installed, please install it or run without wandb"
@@ -140,6 +140,8 @@ def main():
 	elif args.lr_schedule == 'cosine':
 			scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, float(args.epochs))
 
+
+	best_score = 0
 	for epoch in range(args.epochs):
         
 		logging.info('epoch %d lr %e', epoch, optimizer.param_groups[0]['lr'])
@@ -158,6 +160,9 @@ def main():
 		f1macro = metrics.f1_score(targets_cumulative, top_classes, average='macro')
 		stopping_metric = f1score # be negative at stopping_metric
 		# stopping_metric = val_loss # be positive at stopping_metric
+		
+		if best_score < f1score:
+			best_score = f1score
 		
 		logging.info(
 				'Epoch {}/{}, Train loss: {:.4f}, Val loss: {:.4f}, Acc: {:.3f}, f1: {:.3f}, M f1: {:.3f}, '
@@ -180,9 +185,9 @@ def main():
 			
 	end = datetime.now()
 	time = (end - start).total_seconds()
-	logging.info('Best F1: %.3f, Train time: %.3f', early_stopping.best_score, time)
+	logging.info('Best F1: %.3f, Train time: %.3f', best_score, time)
 	if not args.nowand:
-		wandb.log({'Best F1': early_stopping.best_score})
+		wandb.log({'Best F1': best_score})
 
 
 def train(train_queue, model, criterion, optimizer):

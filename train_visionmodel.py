@@ -26,12 +26,12 @@ parser = argparse.ArgumentParser("Vision Model Training")
 parser.add_argument('--dataset', type=str, default='uci', choices=['uci', 'opp', 'kar', 'uni', 'wis'], help='dataset to use')
 parser.add_argument('--data_path', type=str, default='', help='location of the data corpus')
 parser.add_argument('--batch_size', type=int, default=256, help='batch size')
-parser.add_argument('--early_stop', type=int, default=20, help='early stop')
-parser.add_argument('--optimizer', type=str, default='SGD', choices=['SGD', 'Adam', 'AdamW'], help='optimizer')
-parser.add_argument('--lr_schedule', type=str, default='cosine', choices=[None, 'step', 'cosine'], help='lr schedule')
-parser.add_argument('--learning_rate', type=float, default=0.025, help='init learning rate')
-parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
-parser.add_argument('--weight_decay', type=float, default=3e-4, help='weight decay')
+parser.add_argument('--early_stop', type=int, default=0, help='early stop')
+parser.add_argument('--optimizer', type=str, default='Adam', choices=['SGD', 'Adam', 'AdamW'], help='optimizer')
+parser.add_argument('--lr_schedule', type=str, default=None, choices=[None, 'step', 'cosine'], help='lr schedule')
+parser.add_argument('--learning_rate', type=float, default=0.0005, help='init learning rate')
+# parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
+# parser.add_argument('--weight_decay', type=float, default=3e-4, help='weight decay')
 parser.add_argument('--report_freq', type=float, default=50, help='report frequency')
 parser.add_argument('--gpu', type=int, default=0, help='gpu device id')
 parser.add_argument('--epochs', type=int, default=300, help='num of training epochs')
@@ -60,7 +60,7 @@ fh.setFormatter(logging.Formatter(log_format))
 logging.getLogger().addHandler(fh)
 
 if args.wandb_project is None:
-	args.wandb_project = args.dataset
+	args.wandb_project = args.dataset + '-har'
  
 args.model = args.arch.split('_')[0]
 
