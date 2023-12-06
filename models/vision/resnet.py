@@ -329,7 +329,7 @@ def resnet50(*, init_channels: int, **kwargs: Any) -> ResNet:
     .. autoclass:: torchvision.models.ResNet50_Weights
         :members:
     """
-    return _resnet(init_channels, BasicBlock, [3, 4, 6, 3], **kwargs)
+    return _resnet(init_channels, Bottleneck, [3, 4, 6, 3], **kwargs)
 
 
 def resnet101(*, init_channels: int, **kwargs: Any) -> ResNet:
