@@ -5,7 +5,7 @@
 
 # vision model
 for i in $(seq 1 10); do
-    for model in resnet18 resnet34 resnet50 resnet101 resnext50_32x4d resnext101_32x8d resnext101_64x4d squeezenet1_0 squeezenet1_1; do
+    for model in resnet18 resnet34 resnet50 resnet101 squeezenet1_0 squeezenet1_1; do
         CUDA_VISIBLE_DEVICES=0 python train_visionmodel.py --dataset kar --arch $model --seed $i --trial $i
     done
 done

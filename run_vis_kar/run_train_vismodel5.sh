@@ -3,9 +3,12 @@
 #     python train_visionmodel.py --dataset uci --arch $model --seed 0 --trial 0
 # done
 
+
 # vision model
 for i in $(seq 1 10); do
-    for model in mobilenet_v2 mobilenet_v3_small mobilenet_v3_large shufflenet_v2_x0_5 shufflenet_v2_x1_0 shufflenet_v2_x1_5 shufflenet_v2_x2_0; do
+    for model in marnasnet_a marnasnet_b marnasnet_c marnasnet_d marnasnet_e; do
         CUDA_VISIBLE_DEVICES=0 python train_visionmodel.py --dataset kar --arch $model --seed $i --trial $i
     done
 done
+
+ 
