@@ -17,29 +17,27 @@ from data_providers import *
 from models.vision.blocks import *
 from models.vision import create_block
 
+
 def main(args):
     # dataset
     if args.dataset == 'uci':
-        dataset = UCIHARDataProvider(data_path='', train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
+        dataset = UCIHARDataProvider(data_path=args.data_path, train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
     elif args.dataset == 'opp':
-        dataset = OPPDataProvider(data_path='', train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
+        dataset = OPPDataProvider(data_path=args.data_path, train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
     elif args.dataset == 'kar':
-        dataset = KUHARDataProvider(data_path='', train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
+        dataset = KUHARDataProvider(data_path=args.data_path, train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
     elif args.dataset == 'uni':
-        dataset = UniMiBDataProvider(data_path='', train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
+        dataset = UniMiBDataProvider(data_path=args.data_path, train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
     elif args.dataset == 'wis':
-        dataset = WISDMDataProvider(data_path='', train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
+        dataset = WISDMDataProvider(data_path=args.data_path, train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
     else:
         raise ValueError("Unknown dataset type")
     
     init_channels, window_size = dataset.data_shape
     batch_size = args.batch_size
     
-    # set device    
-    device = torch.device("cuda:0" if args.device == 'gpu' else "cpu")
-    
     # create input dummy data
-    input_tensor = torch.randn(batch_size, args.input_channels, window_size).to(device)
+    input_tensor = torch.randn(batch_size, args.input_channels, window_size)
     
     # 1. block: [MB(w/ SE), FusedMB(w/ SE), Conv, SepConv, MB, MB(w/o SE), ResBlock, ResBotneck, ShuffleMB]
     cnf = BlockConfig(
@@ -58,7 +56,6 @@ def main(args):
     # 4. num_layers: [1, 2, 3, 4, 5]
     num_layers_list = [1, 2, 3, 4, 5]
     
-    # block.to(device)
     block.eval()
     
     flops, params = fnn.FlopCountAnalysis(block, input_tensor), fnn.parameter_count(block)
@@ -70,7 +67,7 @@ def main(args):
     size_all_mb = calculate_model_size(block)
     print('block size: {:.3f}MB'.format(size_all_mb))
     
-    # df = pd.read_csv('block_spec.csv')
+    # save CSV
     filename = args.config_file
 
     with open(filename, mode='a', newline='') as f:
@@ -83,8 +80,9 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Compute latency of each vision block for 1D data.')
+    parser = argparse.ArgumentParser(description='Compute metric of each vision block for 1D data.')
     parser.add_argument('--dataset', type=str, default='uci', choices=['uci', 'opp', 'kar', 'uni', 'wis'])
+    parser.add_argument('--data_path', type=str, default='', help='path to dataset')
     parser.add_argument('--batch_size', type=int, default=1, help='batch size. default is 1')
     parser.add_argument('--block_name', type=str, default='ShuffleBlock', 
                         choices=['ConvBlock', 'SeparableConvBlock', 'MBConvBlock', 'ResConvBlock', 'ShuffleBlock'], help='which architecture to use')
@@ -95,6 +93,5 @@ if __name__ == '__main__':
     parser.add_argument('--num_layers', type=int, default=1, help='the number of layers')
     parser.add_argument('--se_ratio', type=float, default=0.0, help='the ratio of squeeze and excitation')
     parser.add_argument('--config_file', type=str, default='block_spec.csv', help='path to config file.')
-    parser.add_argument('--device', type=str, default='cpu', choices=['cpu', 'gpu'])
     args = parser.parse_args()
     main(args)

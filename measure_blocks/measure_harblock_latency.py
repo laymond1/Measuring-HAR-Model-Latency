@@ -16,18 +16,19 @@ from data_providers import *
 from models.harblocks import *
 from models import create_harblock
 
+
 def main(args):
     # dataset
     if args.dataset == 'uci':
-        dataset = UCIHARDataProvider(data_path='', train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
+        dataset = UCIHARDataProvider(data_path=args.data_path, train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
     elif args.dataset == 'opp':
-        dataset = OPPDataProvider(data_path='', train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
+        dataset = OPPDataProvider(data_path=args.data_path, train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
     elif args.dataset == 'kar':
-        dataset = KUHARDataProvider(data_path='', train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
+        dataset = KUHARDataProvider(data_path=args.data_path, train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
     elif args.dataset == 'uni':
-        dataset = UniMiBDataProvider(data_path='', train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
+        dataset = UniMiBDataProvider(data_path=args.data_path, train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
     elif args.dataset == 'wis':
-        dataset = WISDMDataProvider(data_path='', train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
+        dataset = WISDMDataProvider(data_path=args.data_path, train_batch_size=args.batch_size, test_batch_size=args.batch_size, valid_size=None)
     else:
         raise ValueError("Unknown dataset type")
     
@@ -95,7 +96,6 @@ def main(args):
         print("%s: %f" % (args.block_name, latency.avg))
     
     # save CSV
-    # df = pd.read_csv('harblocks.csv')
     filename = args.config_file
 
     with open(filename, mode='a', newline='') as f:
@@ -110,6 +110,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Compute latency of each vision block for 1D data.')
     parser.add_argument('--dataset', type=str, default='uci', choices=['uci', 'opp', 'kar', 'uni', 'wis'])
+    parser.add_argument('--data_path', type=str, default='', help='path to dataset')
     parser.add_argument('--batch_size', type=int, default=1, help='batch size. default is 1')
     parser.add_argument('--block_name', type=str, default='GTSResConvBlock', 
                         choices=['LSTMBlock', 'BiLSTMBlock', 'GTSResConvBlock'], help='which architecture to use')

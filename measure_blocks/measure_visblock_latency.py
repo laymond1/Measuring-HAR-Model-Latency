@@ -16,6 +16,7 @@ from data_providers import *
 from models.vision.blocks import *
 from models.vision import create_block
 
+
 def main(args):
     # dataset
     if args.dataset == 'uci':
@@ -82,7 +83,6 @@ def main(args):
         print("%s: %f" % (args.block_name, latency.avg))
     
     # save CSV
-    # df = pd.read_csv('blocks.csv')
     filename = args.config_file
 
     with open(filename, mode='a', newline='') as f:
@@ -97,6 +97,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Compute latency of each vision block for 1D data.')
     parser.add_argument('--dataset', type=str, default='uci', choices=['uci', 'opp', 'kar', 'uni', 'wis'])
+    parser.add_argument('--data_path', type=str, default='', help='path to dataset')
     parser.add_argument('--batch_size', type=int, default=1, help='batch size. default is 1')
     parser.add_argument('--block_name', type=str, default='ShuffleBlock', 
                         choices=['ConvBlock', 'SeparableConvBlock', 'MBConvBlock', 'ResConvBlock', 'ShuffleBlock'], help='which architecture to use')
@@ -106,7 +107,7 @@ if __name__ == '__main__':
     parser.add_argument('--skip_op', type=str, default='None', choices=['None', 'pool', 'identity'])
     parser.add_argument('--num_layers', type=int, default=1, help='the number of layers')
     parser.add_argument('--se_ratio', type=float, default=0.0, help='the ratio of squeeze and excitation')
-    parser.add_argument('--config_file', type=str, default='blocks.csv', help='path to config file.')
+    parser.add_argument('--config_file', type=str, default='visblocks.csv', help='path to config file.')
     parser.add_argument('--num-runs', type=int, default=100,
                         help='number of runs to compute average forward timing. default is 100')
     parser.add_argument('--hardware', type=str, default='pc', choices=['pc', 'nano'])
