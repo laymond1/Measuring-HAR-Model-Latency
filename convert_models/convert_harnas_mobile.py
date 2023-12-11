@@ -59,9 +59,9 @@ def main(args):
         model = NetworkHAR(init_channels, NUM_CLASSES, layers, genotype)
         input_tensor = torch.zeros(batch_size, init_channels, window_size, 1)
     # DNAS
-    elif args.arch == 'DNAS':
-        import proposed_harnas.genotypes as genotypes
-        from proposed_harnas.model import NetworkHAR
+    elif args.arch in ['DNAS', 'OPP31', 'OPPA31']:
+        import dnas_harnas.genotypes as genotypes
+        from dnas_harnas.model import NetworkHAR
         genotype = eval("genotypes.{}".format(args.arch))
         model = NetworkHAR(init_channels, NUM_CLASSES, layers, genotype, classifier)
         input_tensor = torch.zeros(batch_size, init_channels, window_size, 1)
