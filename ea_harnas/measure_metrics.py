@@ -40,15 +40,11 @@ def main(args):
     batch_size = args.batch_size
     layers = 1
     
-    # set device    
-    # device = torch.device("cuda:0" if args.device == 'gpu' else "cpu")
-    # create input dummy data
-    input_tensor = torch.randn(batch_size, init_channels, window_size, 1) #.to(device)
+    input_tensor = torch.randn(batch_size, init_channels, window_size, 1)
     
-    # measure the latency of model
+    # measure the metrics of model
     genotype = eval("genotypes.{}".format(args.arch))
     model = NetworkHAR(init_channels, NUM_CLASSES, layers, genotype)
-    # model.to(device)
     model.eval()
 
     flops, params = fnn.FlopCountAnalysis(model, input_tensor), fnn.parameter_count(model)
@@ -61,7 +57,6 @@ def main(args):
     print('model size: {:.3f}MB'.format(size_all_mb))
     
     # save CSV
-    # df = pd.read_csv('harnas_spec.csv')
     filename = args.config_file
 
     with open(filename, mode='a', newline='') as f:
@@ -73,15 +68,11 @@ def main(args):
     print("Experiment results saved to", filename)
     
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Compute latency of each vision model for 1D data.')
+    parser = argparse.ArgumentParser(description='Compute metrics of each vision model for 1D data.')
     parser.add_argument('--dataset', type=str, default='uci', choices=['uci', 'opp', 'kar', 'uni', 'wis'])
     parser.add_argument('--data_path', type=str, default='./', help='path to dataset')
     parser.add_argument('--batch_size', type=int, default=1, help='batch size. default is 1')
     parser.add_argument('--arch', type=str, default='EANAS', help='which architecture to use')
     parser.add_argument('--config_file', type=str, default='harnas_spec.csv', help='path to config file.')
-    # parser.add_argument('--num-runs', type=int, default=100,
-    #                     help='number of runs to compute average forward timing. default is 100')
-    # parser.add_argument('--hardware', type=str, default='pc', choices=['pc', 'nano'])
-    # parser.add_argument('--device', type=str, default='cpu', choices=['cpu', 'gpu'])
     args = parser.parse_args()
     main(args)

@@ -1,5 +1,5 @@
-from micro_operations import *
-from ea_utils import drop_path
+from ea_harnas.micro_operations import *
+from ea_harnas.ea_utils import drop_path
 
 
 DEFAULT_PADDINGS = {
