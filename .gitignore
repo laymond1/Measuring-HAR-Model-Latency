@@ -5,9 +5,12 @@ GTSNet
 data/
 
 mobile_pt/
+mobile_blocks_pt/
+mobile_models_pt/
 
 *.csv
 
 result_harmodel/
 result_vismodel/
+result_harnas/
 wandb/
