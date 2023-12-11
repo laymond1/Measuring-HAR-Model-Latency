@@ -3,9 +3,12 @@
 #     python train_visionmodel.py --dataset uci --arch $model --seed 0 --trial 0
 # done
 
+
 # vision model
 for i in $(seq 1 10); do
-    for model in resnet18 resnet34 resnet50 resnet101 squeezenet1_0 squeezenet1_1; do
+    for model in marnasnet_a marnasnet_b marnasnet_c marnasnet_d marnasnet_e; do
         CUDA_VISIBLE_DEVICES=0 python train_visionmodel.py --dataset uci --arch $model --seed $i --trial $i
     done
 done
+
+ 
