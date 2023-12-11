@@ -5,7 +5,7 @@
 
 # vision model
 for i in $(seq 1 10); do
-    for model in efficientnet_b0 efficientnet_b1 efficientnet_b2 efficientnet_b3 efficientnet_b4 efficientnet_b5 efficientnet_b6 efficientnet_b7 efficientnet_v2_s efficientnet_v2_m efficientnet_v2_l; do
+    for model in efficientnet_b0 efficientnet_b1 efficientnet_b2 efficientnet_b3; do
         CUDA_VISIBLE_DEVICES=0 python train_visionmodel.py --dataset uni --arch $model --seed $i --trial $i
     done
 done
