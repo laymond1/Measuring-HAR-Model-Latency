@@ -5,7 +5,7 @@
 
 # vision model
 for i in $(seq 1 10); do
-    for model in mobilenet_v2 mobilenet_v3_small mobilenet_v3_large mnasnet0_5 mnasnet0_75 mnasnet1_0 mnasnet1_3 shufflenet_v2_x0_5 shufflenet_v2_x1_0 shufflenet_v2_x1_5 shufflenet_v2_x2_0; do
+    for model in mobilenet_v2 mobilenet_v3_small mobilenet_v3_large shufflenet_v2_x0_5 shufflenet_v2_x1_0 shufflenet_v2_x1_5 shufflenet_v2_x2_0; do
         CUDA_VISIBLE_DEVICES=0 python train_visionmodel.py --dataset wis --arch $model --seed $i --trial $i
     done
 done
